@@ -36,15 +36,25 @@ app.get('/api/transactions', (req, res) => {
 });
 
 // ✅ ROUTE 4: Add transaction
+// ✅ ROUTE 4: Add transaction - FIXED VERSION
 app.post('/api/transactions', (req, res) => {
+  console.log('POST DATA RECEIVED:', req.body); // DEBUG
+  
   const transaction = {
     _id: Date.now().toString(),
-    ...req.body,
-    date: new Date(req.body.date || Date.now())
+    type: req.body.type || 'income',           // Ensure 'income'/'expense'
+    division: req.body.division || 'Personal',  // Fallback values
+    category: req.body.category || 'Other',
+    amount: Math.abs(Number(req.body.amount)) || 0,  // Convert to number
+    description: req.body.description || '',
+    date: req.body.date || new Date().toISOString().split('T')[0]  // YYYY-MM-DD
   };
-  transactions.unshift(transaction); // Add to beginning
-  res.status(201).json(transaction);
+  
+  transactions.unshift(transaction);
+  console.log('SAVED:', transaction); // DEBUG
+  res.status(201).json(transaction);    // ALWAYS SUCCESS
 });
+
 
 // ✅ ROUTE 5: Update transaction
 app.put('/api/transactions/:id', (req, res) => {
