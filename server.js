@@ -10,7 +10,7 @@ app.use(express.json());
 let transactions = [
   {
     _id: "1",
-    type: "income",
+    type: "Income",
     division: "Personal",
     category: "Salary",
     amount: 20000,
@@ -19,7 +19,7 @@ let transactions = [
   },
   {
     _id: "2",
-    type: "expense",
+    type: "Expense",
     division: "Personal",
     category: "Food",
     amount: 2000,
