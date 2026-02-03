@@ -67,23 +67,41 @@ app.delete('/api/transactions/:id', async (req, res) => {
 // ADD THIS ENDPOINT (before app.listen)
 app.get('/api/stats', async (req, res) => {
   try {
-    const stats = await mongoose.connection.db.collection('transactions').aggregate([
+    const result = await Transaction.aggregate([
       {
         $group: {
           _id: null,
-          income: { $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] } },
-          expense: { $sum: { $cond: [{ $eq: ['$type', 'expense' }, '$amount', 0] } }
+          income: {
+            $sum: {
+              $cond: [
+                { $eq: ['$type', 'income'] },
+                '$amount',
+                0
+              ]
+            }
+          },
+          expense: {
+            $sum: {
+              $cond: [
+                { $eq: ['$type', 'expense'] },
+                '$amount',
+                0
+              ]
+            }
+          }
         }
       }
-    ]).toArray();
-    
+    ]);
+
+    const stats = result[0] || { income: 0, expense: 0 };
     res.json({
-      income: stats[0]?.income || 0,
-      expense: stats[0]?.expense || 0,
-      net: (stats[0]?.income || 0) - (stats[0]?.expense || 0)
+      income: stats.income,
+      expense: stats.expense,
+      net: stats.income - stats.expense
     });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error('Stats error:', error);
+    res.status(500).json({ error: 'Failed to fetch stats' });
   }
 });
 
