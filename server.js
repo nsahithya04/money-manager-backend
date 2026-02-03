@@ -64,6 +64,29 @@ app.delete('/api/transactions/:id', async (req, res) => {
   await Transaction.findByIdAndDelete(req.params.id);
   res.json({ message: 'Deleted' });
 });
+// ADD THIS ENDPOINT (before app.listen)
+app.get('/api/stats', async (req, res) => {
+  try {
+    const stats = await mongoose.connection.db.collection('transactions').aggregate([
+      {
+        $group: {
+          _id: null,
+          income: { $sum: { $cond: [{ $eq: ['$type', 'income'] }, '$amount', 0] } },
+          expense: { $sum: { $cond: [{ $eq: ['$type', 'expense' }, '$amount', 0] } }
+        }
+      }
+    ]).toArray();
+    
+    res.json({
+      income: stats[0]?.income || 0,
+      expense: stats[0]?.expense || 0,
+      net: (stats[0]?.income || 0) - (stats[0]?.expense || 0)
+    });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 
 app.listen(PORT, () => {
   console.log(`🚀 Server running on http://localhost:${PORT}`);
