@@ -8,8 +8,8 @@ const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: "*",
-  methods: ["GET", "POST", "PUT", "DELETE"]
+  origin: ['https://money-manager-frontend-new-git-main-sahithyas-projects-7cb5afa0.vercel.app', 'http://localhost:5000'],
+  credentials: true
 }));
 app.use(express.json());
 
