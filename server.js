@@ -1,20 +1,28 @@
+import express from 'express';
+import mongoose from 'mongoose';
+import cors from 'cors';
+import dotenv from 'dotenv';
 
-const express = require('express');
-const mongoose = require('mongoose');
-const cors = require('cors');
-require('dotenv').config();
+dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
 app.use(cors({
-  origin: ['https://money-manager-frontend-new-git-main-sahithyas-projects-7cb5afa0.vercel.app', 'http://localhost:5000'],
+  origin: [
+    "http://localhost:5173",
+    "https://money-manager-frontend-new-git-main-sahithyas-projects-7cb5afa0.vercel.app"
+  ],
+  methods: ["GET", "POST", "PUT", "DELETE"],
   credentials: true
 }));
+
 app.use(express.json());
 
 mongoose.connect(process.env.MONGODB_URI);
-mongoose.connection.once('open', () => console.log('✅ MongoDB Connected!'));
+mongoose.connection.once('open', () =>
+  console.log('✅ MongoDB Connected!')
+);
 
 const transactionSchema = new mongoose.Schema({
   type: { type: String, required: true },
@@ -27,17 +35,17 @@ const transactionSchema = new mongoose.Schema({
 
 const Transaction = mongoose.model('Transaction', transactionSchema);
 
-// ✅ SINGLE WORKING /api/stats
 app.get('/api/stats', async (req, res) => {
   try {
     const transactions = await Transaction.find();
     const income = transactions
       .filter(t => t.type === 'income')
       .reduce((sum, t) => sum + t.amount, 0);
+
     const expense = transactions
       .filter(t => t.type === 'expense')
       .reduce((sum, t) => sum + t.amount, 0);
-    
+
     res.json({
       income,
       expense,
@@ -61,7 +69,11 @@ app.post('/api/transactions', async (req, res) => {
 });
 
 app.put('/api/transactions/:id', async (req, res) => {
-  const transaction = await Transaction.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const transaction = await Transaction.findByIdAndUpdate(
+    req.params.id,
+    req.body,
+    { new: true }
+  );
   res.json(transaction);
 });
 
